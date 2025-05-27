@@ -1,14 +1,14 @@
 import os
 import json
 from dotenv import load_dotenv
-import openai
+from openai import AsyncOpenAI
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("Переменная окружения OPENAI_API_KEY не установлена.")
 
-openai.api_key = api_key
+client = AsyncOpenAI(api_key=api_key)
 
 async def parse_command_with_gpt(user_input: str) -> dict:
     system_prompt = (
@@ -16,7 +16,7 @@ async def parse_command_with_gpt(user_input: str) -> dict:
         '{"action": "buy", "symbol": "BTCUSDT", "amount": 0.001}'
     )
     try:
-        response = await openai.ChatCompletion.acreate(
+        response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -40,7 +40,7 @@ async def parse_command_with_gpt(user_input: str) -> dict:
 
 async def get_gpt_response(user_input: str) -> str:
     try:
-        response = await openai.ChatCompletion.acreate(
+        response = await client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "user", "content": user_input}
